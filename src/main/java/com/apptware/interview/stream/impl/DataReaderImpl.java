@@ -7,6 +7,8 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -34,8 +36,23 @@ class DataReaderImpl implements DataReader {
     // Placeholder for paginated data fetching logic
     // The candidate will add the actual implementation here
 
-    Stream<String> dataStream =
-        Stream.empty(); // Temporary, will be replaced by the actual data stream
-    return dataStream.peek(item -> log.info("Fetched Item: {}", item));
+    Integer pageSize = 50;
+    int totalPages = (int) Math.ceil((double) PaginationService.FULL_DATA_SIZE / pageSize);
+    
+    List<String> allData = new ArrayList<>();
+    
+    for (int page = 1; page <= totalPages; page++) {
+        log.info("Fetching data for page {}", page);
+    
+        // Fetch data for the current page
+        List<String> pageData = paginationService.getPaginatedData(page, pageSize);
+    
+        log.info("Page {} contains {} items", page, pageData.size());
+        allData.addAll(pageData); // Add page data to the main list
+    }
+    
+    // Convert all items into a stream and log each fetched item
+    return allData.stream()
+                  .peek(item -> log.info("Fetched Item: {}", item));
   }
 }
